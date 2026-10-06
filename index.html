@@ -1,1 +1,437 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HyperBolt OS 3.2</title>
+<style>
+*{box-sizing:border-box;margin:0;font-family:system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#000}
+body{display:flex;justify-content:center;align-items:center}
+#os{position:relative;width:min(100vw,380px);height:min(100vh,780px);height:min(100dvh,780px);overflow:hidden;touch-action:none;user-select:none;color:#fff;background:var(--bg);--bg:#14141f;--ac:#ffd400;--card:#ffffff22;--win:#f4f4f8;--wf:#111}
+#os.dark{--win:#16161d;--wf:#eee}
+@media(min-width:420px){#os{border:8px solid #222;border-radius:34px}}
+.s{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;background:var(--bg)}
+.s.on{display:flex}
+#boot{align-items:center;justify-content:center;background:#000;z-index:50;text-align:center;gap:6px}
+#boot span{font-size:90px}#boot small{color:#888}
+#lock{align-items:center;padding:56px 20px}
+#t{font-size:68px;font-weight:200}#g{margin-top:6px;opacity:.9}
+.c{position:absolute;bottom:44px;width:54px;height:54px;border-radius:50%;border:0;background:var(--card);color:#fff;font-size:24px}
+#cam{left:24px}#tor{right:24px}
+#hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:13px;opacity:.8}
+#home{padding:40px 14px 50px;overflow-y:auto;touch-action:pan-y}
+#grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 4px}
+.ap{text-align:center;font-size:11px;cursor:pointer}
+.ap i{display:flex;width:54px;height:54px;margin:0 auto 4px;border-radius:16px;background:var(--card);align-items:center;justify-content:center;font-style:normal;font-size:28px}
+#app{z-index:20;background:var(--win);color:var(--wf)}
+#app header{display:flex;justify-content:space-between;align-items:center;padding:34px 16px 10px;font-size:20px}
+#ab{flex:1;overflow:auto;touch-action:pan-y;padding:12px 16px 40px}
+#setup{z-index:30;padding:40px 22px 20px;overflow:auto;touch-action:pan-y}
+#auth{z-index:45;background:#000d;align-items:center;justify-content:center;text-align:center;padding:24px}
+#qs{position:absolute;top:0;left:0;right:0;z-index:40;background:#0f0f19f5;padding:30px 16px 14px;border-radius:0 0 24px 24px;transform:translateY(-105%);transition:transform .2s}
+#qs.open{transform:none}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 0}
+.tile{padding:13px 4px;border-radius:14px;background:#2a2a3a;text-align:center;font-size:13px;cursor:pointer}
+.tile.on{background:var(--ac);color:#000}
+#edge{position:absolute;top:0;left:0;right:0;height:26px;z-index:36;touch-action:none}
+#bar{position:absolute;bottom:6px;left:50%;width:120px;height:5px;margin-left:-60px;border-radius:5px;background:#fff;opacity:.7;z-index:31;cursor:pointer}
+#eye{position:absolute;top:0;left:0;right:0;bottom:0;z-index:60;pointer-events:none;background:#ff8a00;mix-blend-mode:multiply;opacity:0}
+#flash{position:absolute;top:0;left:0;right:0;bottom:0;z-index:55;background:#fff;color:#000;display:none;align-items:center;justify-content:center;font-size:26px;text-align:center;cursor:pointer}
+button{font-size:15px;border:0;border-radius:12px;padding:11px 16px;margin:4px 2px;cursor:pointer}
+.b{background:var(--ac);color:#000;font-weight:700}.g{background:#8884;color:inherit}
+input,select,textarea{width:100%;padding:11px;margin:5px 0;border:1px solid #888;border-radius:10px;font-size:15px;color:#111;background:#fff}
+input[type=checkbox],input[type=radio],input[type=range]{width:auto}
+label{display:block;margin:8px 0}h3{margin:10px 0 6px}
+.m{font-size:13px;min-height:18px;color:#6c6}.m2{font-size:12px;opacity:.6;margin-top:8px}
+.dots{display:flex;gap:6px;justify-content:center;margin-bottom:14px}.dots span{width:8px;height:8px;border-radius:50%;background:#555}.dots .a{background:var(--ac)}
+.nav{margin-top:14px}.logo{font-size:60px;text-align:center}
+.pat{display:grid;grid-template-columns:repeat(3,56px);gap:14px;justify-content:center;margin:10px 0}
+.pat button{width:56px;height:56px;border-radius:50%;border:2px solid #888;background:#8883;color:inherit;padding:0}.pat .s{background:var(--ac);color:#000}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.keys button{padding:15px;font-size:20px;background:#8883;color:inherit}
+.big{text-align:center;min-height:38px;font-size:28px}.row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #8884}
+.th{display:inline-block;width:46%;height:84px;margin:2%;border-radius:14px;color:#fff;font-weight:700;padding:8px;font-size:13px;border:3px solid transparent;cursor:pointer}.th.sel{border-color:#ffd400}
+video{width:100%;border-radius:12px;background:#000;min-height:280px}.fv{width:140px;height:140px;border-radius:50%;object-fit:cover;margin:8px}
+.ap{word-break:break-word}.ap i svg{width:40px;height:40px}.ap i b,.ap i span{pointer-events:none}#at svg{width:24px;height:24px;vertical-align:middle}
+.msg{background:#8883;padding:8px 12px;border-radius:12px;margin:5px 0;max-width:80%;word-break:break-word}.me{background:var(--ac);color:#000;margin-left:auto}
+.gr3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.gr3 button{height:88px;font-size:38px;background:#fff;color:#111}
+.gr4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.gr4 button{height:70px;font-size:30px;background:#8883;color:inherit;padding:0}
+#toast{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);background:#000d;color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;text-align:center}#toast.on{opacity:1}
+#shut{position:absolute;top:0;left:0;right:0;bottom:0;background:#fff;z-index:75;opacity:0;pointer-events:none}
+</style></head>
+<body>
+<div id="os">
+  <div class="s on" id="boot"><span>⚡</span><b style="font-size:22px;letter-spacing:2px">HyperBolt OS</b><small>3.2 Lite</small></div>
+  <div class="s" id="setup"></div>
+  <div class="s" id="lock"><div id="t"></div><div id="d"></div><div id="g"></div>
+    <button class="c" id="cam">📷</button><button class="c" id="tor">🔦</button><div id="hint"></div></div>
+  <div class="s" id="home"><div id="grid"></div></div>
+  <div class="s" id="app"><header><b id="at"></b><button class="g" id="ax">✕</button></header><div id="ab"></div></div>
+  <div class="s" id="auth"></div>
+  <div id="qs"><div style="text-align:center;font-size:13px;opacity:.7">⚡ Quick settings</div><div class="tiles" id="tiles"></div>
+    <div style="font-size:13px">☀ Screen dimmer <input type="range" id="bri" min="30" max="100" value="100" style="width:60%"></div>
+    <div id="net" style="font-size:12px;opacity:.7;margin-top:8px"></div></div>
+  <div id="flash"><div style="font-size:60px">🔦<div style="font-size:22px">Flashlight ON</div><small style="font-size:13px">Tap to turn off</small></div></div>
+  <div id="shut"></div><div id="toast"></div><div id="edge"></div><div id="bar"></div><div id="eye"></div>
+</div>
+<script>
+// ===== HyperBolt OS 3.2 Lite: one small file, no libraries =====
+const $=s=>document.querySelector(s),T0=performance.now();
+window.onerror=m=>{const b=$('#boot');if(b)b.insertAdjacentHTML('beforeend','<p style="color:#f66;font-size:11px;padding:8px">Error: '+m+'</p>')};
 
+// ---- saved data (one key, one object) ----
+const K='hbos3',D={done:0,step:0,lang:'English',name:'',email:'',lock:'',secret:'',face:0,fp:0,real:0,cred:'',eye:0,lvl:40,dark:1,theme:0,note:'',perm:{},inst:[],chats:{},ev:{},todo:[]};
+let S;try{S=Object.assign({},D,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){S=Object.assign({},D)}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+
+// ---- languages and themes ----
+const TR={English:['Swipe up to unlock','Next','Back','Welcome to HyperBolt OS'],Hindi:['अनलॉक करने के लिए ऊपर स्वाइप करें','आगे','पीछे','HyperBolt OS में स्वागत है'],Kannada:['ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ','ಮುಂದೆ','ಹಿಂದೆ','HyperBolt OS ಗೆ ಸ್ವಾಗತ'],Spanish:['Desliza hacia arriba para desbloquear','Siguiente','Atrás','Bienvenido a HyperBolt OS'],French:['Balayez vers le haut','Suivant','Retour','Bienvenue sur HyperBolt OS']};
+const t=i=>(TR[S.lang]||TR.English)[i];
+const TH=[['Bolt','linear-gradient(160deg,#14141f,#3a3000)','#ffd400'],['Ocean','linear-gradient(160deg,#023e8a,#00b4d8)','#caf0f8'],['Sunset','linear-gradient(160deg,#6a0572,#ff7b00)','#ffe066'],['Forest','linear-gradient(160deg,#0b3d20,#52b788)','#d8f3dc'],['Candy','linear-gradient(160deg,#ff5fa2,#845ef7)','#fff3bf'],['Night','#000','#4dabf7']];
+function look(){const o=$('#os');o.style.setProperty('--bg',TH[S.theme][1]);o.style.setProperty('--ac',TH[S.theme][2]);o.classList.toggle('dark',!!S.dark);$('#eye').style.opacity=S.eye?S.lvl/100:0}
+
+// ---- screens ----
+let CAM=null,TOR=null;
+const on=id=>$('#'+id).classList.contains('on');
+function closeApp(){$('#app').classList.remove('on');if(CAM){CAM.getTracks().forEach(x=>x.stop());CAM=null}}
+function go(id){['setup','lock','home'].forEach(x=>$('#'+x).classList.toggle('on',x===id));closeApp();$('#qs').classList.remove('open')}
+function tick(){const d=new Date(),h=d.getHours();$('#t').textContent=pad(h)+':'+pad(d.getMinutes());$('#d').textContent=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  $('#g').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+(S.name?', '+S.name:'')}
+setInterval(tick,1000);
+
+// ---- flashlight (real torch if the browser allows, else a white screen) ----
+async function torch(onoff){$('#flash').style.display=onoff?'flex':'none';
+  try{if(onoff){TOR=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});await TOR.getVideoTracks()[0].applyConstraints({advanced:[{torch:true}]})}
+  else if(TOR){TOR.getTracks().forEach(x=>x.stop());TOR=null}}catch(e){}}
+const torchOn=()=>$('#flash').style.display==='flex';
+$('#flash').onclick=()=>{torch(false);tiles()};$('#tor').onclick=()=>torch(true);
+
+// ---- biometrics: your phone's own face / fingerprint prompt (WebAuthn). Real only: needs https:// ----
+const BIO=()=>!!(window.PublicKeyCredential&&window.isSecureContext);
+async function wa(k){
+  if(!BIO())return 'unsupported';
+  try{if(!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()))return 'unsupported';
+    const r=n=>crypto.getRandomValues(new Uint8Array(n));
+    if(k==='enroll'){const c=await navigator.credentials.create({publicKey:{challenge:r(32),rp:{name:'HyperBolt OS'},user:{id:r(16),name:S.name||'user',displayName:S.name||'user'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'}}});S.cred=btoa(String.fromCharCode(...new Uint8Array(c.rawId)));save()}
+    else await navigator.credentials.get({publicKey:{challenge:r(32),userVerification:'required',allowCredentials:S.cred?[{type:'public-key',id:Uint8Array.from(atob(S.cred),c=>c.charCodeAt(0))}]:[]}});
+    return 'ok'}catch(e){return /Security|NotSupported/.test(e.name)?'unsupported':'no'}}
+
+// ---- lock: pattern, setup UI, unlock prompt ----
+function pat(el,cb,lbl){let q=[];
+  el.innerHTML='<div class="pat">'+[1,2,3,4,5,6,7,8,9].map(n=>`<button data-n="${n}">${n}</button>`).join('')+`</div><div class="m" id="pm"></div><button class="b" id="po">${lbl}</button><button class="g" id="pc">Clear</button>`;
+  el.querySelector('.pat').onclick=e=>{const b=e.target.closest('button');if(b&&!q.includes(b.dataset.n)){q.push(b.dataset.n);b.classList.add('s')}};
+  el.querySelector('#pc').onclick=()=>{q=[];el.querySelectorAll('.pat button').forEach(b=>b.classList.remove('s'))};
+  el.querySelector('#po').onclick=()=>q.length<4?el.querySelector('#pm').textContent='Use at least 4 dots':cb(q.join(''))}
+function lockUI(el){let type=S.lock||'none';
+  const NB='⚠ Face and fingerprint need an https:// address and a phone with face or fingerprint set up. They cannot be turned on from a downloaded file.';
+  const draw=(note)=>{
+    el.innerHTML='<h3>🔒 Screen lock</h3>'+['none','PIN','password','pattern'].map(x=>`<label><input type="radio" name="lk" value="${x}" ${type===x?'checked':''}> ${x}</label>`).join('')+`<div id="mk"></div><h3>Biometrics</h3><label><input type="checkbox" id="fc" ${S.face?'checked':''}> 🙂 Face unlock</label><label><input type="checkbox" id="fp" ${S.fp?'checked':''}> 👆 Fingerprint unlock</label><div class="m" id="bm">${note||''}</div><div class="m2">Uses your phone’s own biometric prompt. A PIN, password or pattern is required as a backup.</div>`;
+    const bm=el.querySelector('#bm'),msg=(x,c)=>{bm.textContent=x;bm.style.color=c||'#6c6'};if(!note&&!BIO())msg(NB,'#fc6');
+    el.querySelectorAll('[name=lk]').forEach(r=>r.onchange=()=>{type=r.value;if(type==='none'){S.lock='';S.secret='';S.face=S.fp=0;S.cred='';save()}draw()});
+    const mk=el.querySelector('#mk');
+    if(type==='PIN'||type==='password'){mk.innerHTML=`<input id="sv" type="password" placeholder="${type==='PIN'?'PIN (4+ digits)':'Password (4+ characters)'}" ${type==='PIN'?'inputmode="numeric"':''}><div class="m" id="er" style="color:#f88"></div><button class="b" id="ok">Set ${type}</button>`;
+      mk.querySelector('#ok').onclick=()=>{const v=mk.querySelector('#sv').value;if(v.length<4||(type==='PIN'&&!/^\d+$/.test(v))){mk.querySelector('#er').textContent=type==='PIN'?'PIN must be 4+ digits':'Need 4+ characters';return}S.lock=type;S.secret=v;save();draw('✔ '+type+' saved')}}
+    else if(type==='pattern')pat(mk,s=>{S.lock='pattern';S.secret=s;save();draw('✔ Pattern saved')},'Set pattern');
+    const toggle=(key)=>async e=>{
+      if(!e.target.checked){S[key]=0;if(!S.face&&!S.fp)S.cred='';save();return}
+      if(!S.lock){e.target.checked=false;msg('⚠ First choose PIN, password or pattern, enter it and press Set.','#fc6');return}
+      msg('Use your phone’s face or fingerprint…','#6cf');const r=await wa(S.cred?'verify':'enroll');
+      if(r!=='ok'){e.target.checked=false;msg(r==='unsupported'?NB:'Cancelled or not recognised.',r==='unsupported'?'#fc6':'#f88');return}
+      S[key]=1;save();msg('✔ '+(key==='face'?'Face':'Fingerprint')+' unlock on')};
+    el.querySelector('#fc').onchange=toggle('face');el.querySelector('#fp').onchange=toggle('fp');
+  };draw()}
+function ask(ok){const a=$('#auth');a.classList.add('on');
+  a.innerHTML=`<div><h3>🔒 ${S.lock==='PIN'?'Enter PIN':S.lock==='password'?'Enter password':'Draw pattern'}</h3><div id="ai"></div><div class="m" id="ae"></div>${S.face?'<button class="b" id="bf">🙂 Face</button>':''}${S.fp?'<button class="b" id="bp">👆 Fingerprint</button>':''}<button class="g" id="ac">Cancel</button></div>`;
+  const ai=a.querySelector('#ai'),er=a.querySelector('#ae'),fin=()=>{a.classList.remove('on');ok()};
+  if(S.lock==='pattern')pat(ai,s=>s===S.secret?fin():(er.style.color='#f88',er.textContent='Wrong pattern'),'Unlock');
+  else{ai.innerHTML=`<input id="av" type="password" ${S.lock==='PIN'?'inputmode="numeric"':''} style="max-width:260px"><br><button class="b" id="ag">Unlock</button>`;ai.querySelector('#ag').onclick=()=>ai.querySelector('#av').value===S.secret?fin():(er.style.color='#f88',er.textContent='Wrong '+S.lock)}
+  const bio=async()=>{er.style.color='#6cf';er.textContent='Use your phone’s face or fingerprint…';const r=await wa('verify');r==='ok'?fin():(er.style.color='#f88',er.textContent=(r==='unsupported'?'Biometrics are not available on this page.':'Not recognised.')+' Use your '+S.lock+'.')};
+  const bf=a.querySelector('#bf'),bp=a.querySelector('#bp');if(bf)bf.onclick=bio;if(bp)bp.onclick=bio;
+  a.querySelector('#ac').onclick=()=>a.classList.remove('on')}
+const unlock=()=>S.lock?ask(()=>go('home')):go('home');
+$('#hint').onclick=unlock;
+
+// ---- eye care, themes, permissions (used by setup AND Settings) ----
+function eyeUI(el){el.innerHTML=`<h3>👁 Eye care</h3><label><input type="checkbox" id="ey" ${S.eye?'checked':''}> Warm comfort filter</label><label>Strength <input type="range" id="lv" min="10" max="80" value="${S.lvl}"></label><label><input type="checkbox" id="dk" ${S.dark?'checked':''}> Dark mode</label>`;
+  el.querySelector('#ey').onchange=e=>{S.eye=e.target.checked?1:0;save();look()};el.querySelector('#lv').oninput=e=>{S.lvl=+e.target.value;save();look()};el.querySelector('#dk').onchange=e=>{S.dark=e.target.checked?1:0;save();look()}}
+function themeUI(el){el.innerHTML='<h3>🎨 Themes</h3>'+TH.map((x,i)=>`<div class="th ${i===S.theme?'sel':''}" data-i="${i}" style="background:${x[1]}">${x[0]}</div>`).join('');
+  el.onclick=e=>{const d=e.target.closest('.th');if(d){S.theme=+d.dataset.i;save();look();themeUI(el)}}}
+const PERMS=[['cam','📷 Camera'],['mic','🎤 Microphone'],['loc','📍 Location'],['not','🔔 Notifications']];
+async function askPerm(k){try{
+  if(k==='cam'||k==='mic'){const s=await navigator.mediaDevices.getUserMedia(k==='cam'?{video:true}:{audio:true});s.getTracks().forEach(x=>x.stop());return 1}
+  if(k==='loc')return await new Promise(r=>navigator.geolocation?navigator.geolocation.getCurrentPosition(()=>r(1),()=>r(0),{timeout:15000}):r(0));
+  if(k==='not')return window.Notification&&(await Notification.requestPermission())==='granted'?1:0}catch(e){}return 0}
+function permUI(el,all){el.innerHTML='<h3>📲 App permissions</h3><div class="m2">Your browser will ask you to confirm each one.</div>'+PERMS.map(p=>`<label><input type="checkbox" data-p="${p[0]}" ${S.perm[p[0]]?'checked':''}> ${p[1]}</label>`).join('')+(all?'<button class="b" id="pa">Allow all</button>':'')+'<div class="m" id="pe" style="color:#f88"></div>';
+  const note=x=>el.querySelector('#pe').textContent=x;
+  el.querySelectorAll('[data-p]').forEach(c=>c.onchange=async()=>{const k=c.dataset.p;if(!c.checked){S.perm[k]=0;save();return}const ok=await askPerm(k);S.perm[k]=ok;c.checked=!!ok;save();note(ok?'':'Not allowed. Turn it on in your browser’s site settings.')});
+  if(all)el.querySelector('#pa').onclick=async()=>{for(const p of PERMS)if(!S.perm[p[0]]){S.perm[p[0]]=await askPerm(p[0]);save()}permUI(el,all)}}
+
+// ---- setup: shown before the phone can be used ----
+const ST=[
+ sb=>{sb.innerHTML=`<div class="logo">⚡</div><h2 style="text-align:center">${t(3)}</h2><h3>🌐 Language</h3><select id="ln">${Object.keys(TR).map(l=>`<option ${l===S.lang?'selected':''}>${l}</option>`).join('')}</select>`;$('#ln').onchange=e=>{S.lang=e.target.value;save();setup()}},
+ sb=>{sb.innerHTML=`<h3>👤 About you</h3><input id="nm" placeholder="Your name or HyperBolt ID" value="${esc(S.name)}"><input id="em" type="email" placeholder="Email address" value="${esc(S.email)}">`;
+   return()=>{const n=$('#nm').value.trim(),e=$('#em').value.trim();if(n.length<2){$('#se').textContent='Enter a name (2+ letters)';return false}if(!/^\S+@\S+\.\S+$/.test(e)){$('#se').textContent='Enter a valid email';return false}S.name=n;S.email=e;save()}},
+ sb=>lockUI(sb),
+ sb=>eyeUI(sb),
+ sb=>themeUI(sb),
+ sb=>permUI(sb,1),
+ sb=>{sb.innerHTML=`<div class="logo" style="margin-top:60px">⚡</div><h2 style="text-align:center">All set, ${esc(S.name)}!</h2><p style="text-align:center">HyperBolt OS is ready.</p>`}];
+function setup(){go('setup');const el=$('#setup'),n=ST.length,i=S.step;
+  el.innerHTML='<div class="dots">'+ST.map((_,k)=>`<span class="${k<=i?'a':''}"></span>`).join('')+`</div><div id="sb"></div><div class="nav"><button class="g" id="bk" style="visibility:${i?'visible':'hidden'}">${t(2)}</button><button class="b" id="nx">${i===n-1?'Start ⚡':t(1)}</button></div><div class="m" id="se" style="color:#f88"></div>`;
+  const chk=ST[i]($('#sb'))||(()=>1);
+  $('#bk').onclick=()=>{S.step--;save();setup()};
+  $('#nx').onclick=()=>{if(chk()===false)return;if(i===n-1){S.done=1;save();go('lock')}else{S.step++;save();setup()}}}
+
+// ---- big data (photos, files) lives in IndexedDB; small settings live in localStorage ----
+const DB={o(){return DB._d||(DB._d=new Promise((ok,no)=>{const r=indexedDB.open('hbos',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>ok(r.result);r.onerror=no}))},
+ async get(k){try{const d=await DB.o();return await new Promise(r=>{const q=d.transaction('f').objectStore('f').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()})}catch(e){}},
+ async set(k,v){try{const d=await DB.o();d.transaction('f','readwrite').objectStore('f').put(v,k)}catch(e){}}};
+const getP=async()=>(await DB.get('photos'))||[];
+const shrink=f=>new Promise(r=>{const i=new Image;i.onload=()=>{const s=Math.min(1,720/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*s;c.height=i.height*s;c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.7))};i.onerror=()=>r('');i.src=URL.createObjectURL(f)});
+
+// ---- logos ----
+const BASKET=`<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M14 31C14 -3 50 -3 50 31" fill="none" stroke="#8b5a2b" stroke-width="4" stroke-linecap="round"/><path d="M16 30C16 1 48 1 48 30" fill="none" stroke="#d9a15a" stroke-width="1.4" stroke-linecap="round"/><ellipse cx="32" cy="32" rx="25" ry="7" fill="#4a2e10"/><polygon points="38,3 20,30 31,30 26,46 46,20 34,20 40,3" fill="#ffd400" stroke="#ff9f00" stroke-width="1.6" stroke-linejoin="round"/><path d="M7 33Q32 46 57 33L51 58Q32 65 13 58Z" fill="#c98a45"/><path d="M32 43.5Q46 42 57 33L51 58Q42 62 32 63Z" fill="#a8692a"/><g stroke="#7a4a1a" stroke-width="1.3" fill="none" opacity=".7"><path d="M9 41Q32 54 55 41"/><path d="M11 49Q32 60 53 49"/><path d="M20 40L22 60M32 46V63M44 40L42 60"/></g><path d="M7 33Q32 46 57 33" fill="none" stroke="#efbd78" stroke-width="3" stroke-linecap="round"/></svg>`;
+// HyperAI: a white lightning bolt (HyperBolt) with gold sparkles (AI) inside a thin ring
+const AIICON=`<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="28" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="2"/><polygon points="36,8 19,35 30,35 26,57 46,26 34,26 41,8" fill="#fff"/><path d="M50 9l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#ffe066"/><path d="M13 15l1.5 3.5 3.5 1.5-3.5 1.5L13 25l-1.5-3.5L8 20l3.5-1.5z" fill="#ffe066"/><circle cx="52" cy="46" r="2" fill="#ffe066"/></svg>`;
+const GICON='<b style="font:700 34px/1 Arial,sans-serif;background:conic-gradient(from -45deg,#ea4335 0 25%,#fbbc05 0 50%,#34a853 0 75%,#4285f4 0);-webkit-background-clip:text;background-clip:text;color:transparent">G</b>';
+let WQ='';const FREE=[['Internet Archive Movies','https://archive.org/details/movies','🏛️'],['Tubi','https://tubitv.com','🎞️'],['Pluto TV','https://pluto.tv','📡']];
+const JK=['Why did the phone wear glasses? It lost its contacts! 😄','What do you call a sleeping computer? A nap-top! 💤','Why was the math book sad? Too many problems. 📘','What is a robot’s favorite snack? Micro-chips! 🤖'];
+const offline=b=>{if(navigator.onLine)return 0;b.innerHTML='<p style="text-align:center;margin-top:60px;font-size:40px">📵</p><p style="text-align:center">No internet</p>';return 1};
+
+// ===== default apps =====
+function settings(b){b.innerHTML=`<div class="row">Language<select id="sl" style="width:auto">${Object.keys(TR).map(l=>`<option ${l===S.lang?'selected':''}>${l}</option>`).join('')}</select></div><div class="row">Account<span>${esc(S.name)}</span></div><div id="s1"></div><div id="s2"></div><div id="s3"></div><div style="margin-top:12px"><button class="b" id="ru">🔁 Run setup again</button><button class="g" id="rs">Reset phone</button></div><h3>About</h3><div class="row">Version<b>HyperBolt OS 3.2 Lite</b></div><div class="row">Ready in<b>${READY} ms</b></div><div class="row">Size<b>${(document.documentElement.outerHTML.length/1024).toFixed(1)} KB</b></div><div class="row">Apps<b>${all().length}</b></div><div class="m2">New in 3.2: no pretend features. Screenshot in the pull-down menu, real chat rooms, real biometrics only, saved voice recordings.</div>`;
+  eyeUI($('#s1'));permUI($('#s2'));lockUI($('#s3'));
+  $('#sl').onchange=e=>{S.lang=e.target.value;save();$('#hint').textContent=t(0)};
+  $('#ru').onclick=()=>{S.step=0;save();setup()};
+  $('#rs').onclick=()=>{if(confirm('Erase everything and restart?')){try{localStorage.removeItem(K);indexedDB.deleteDatabase('hbos')}catch(e){}location.reload()}}}
+function themes(b){b.innerHTML='<div id="a1"></div><div id="a2"></div>';themeUI($('#a1'));eyeUI($('#a2'))}
+
+function store(b){let cat='All',q='';const cats=['All','Apps','Tools','Websites'];
+  const d=()=>{const L=X.filter(a=>(cat==='All'||a[5]===cat)&&(a[0]+' '+a[6]).toLowerCase().includes(q.toLowerCase()));
+    b.innerHTML=`<div style="text-align:center"><div style="width:70px;margin:0 auto">${BASKET}</div><h2>HyperBolt Store</h2></div><input id="sq" placeholder="Search apps and websites" value="${esc(q)}"><div>${cats.map(c=>`<button class="${c===cat?'b':'g'}" data-c="${c}">${c}</button>`).join('')}</div>`+
+    (L.map(a=>`<div class="row" style="flex-wrap:wrap;gap:6px"><span style="display:flex;gap:10px;align-items:center"><span style="font-size:28px;width:36px;text-align:center">${a[1]}</span><span><b>${esc(a[0])}</b><br><small style="opacity:.6">${esc(a[6])}</small></span></span><span>${S.inst.includes(a[4])?`<button class="b" data-o="${a[4]}">Open</button><button class="g" data-u="${a[4]}">Remove</button>`:`<button class="b" data-g="${a[4]}">⬇ Get</button>`}</span></div>`).join('')||'<p class="m2">No results</p>');
+    $('#sq').onchange=e=>{q=e.target.value;d()};
+    b.onclick=e=>{const t=e.target,c=t.dataset.c,g=t.dataset.g,u=t.dataset.u,o=t.dataset.o;
+      if(c){cat=c;d()}else if(g){S.inst.push(g);save();grid();d();toast('Added to your home screen')}
+      else if(u){S.inst=S.inst.filter(i=>i!==u);save();grid();d()}else if(o)openApp(X.find(a=>a[4]===o))}};d()}
+
+function games(b){const G={'🐍 Snake':snake,'⭕ Tic-Tac-Toe':ttt,'🧠 Memory Match':memory};
+  const m=()=>{b.innerHTML='<h3>🎮 Games</h3>'+Object.keys(G).map(k=>`<button class="b" data-g="${k}" style="display:block;width:100%;margin:8px 0">${k}</button>`).join('');
+    b.onclick=e=>{const g=e.target.dataset.g;if(g){b.innerHTML='<button class="g" id="gb">← Games</button><div id="gx"></div>';b.onclick=null;$('#gb').onclick=m;G[g]($('#gx'))}}};m()}
+function snake(b){b.innerHTML='<canvas id="sc" width="300" height="300" style="width:100%;background:#111;border-radius:12px"></canvas><div style="text-align:center;margin-top:6px"><button class="g" data-d="U">⬆</button><br><button class="g" data-d="L">⬅</button><button class="g" data-d="D">⬇</button><button class="g" data-d="R">➡</button></div><h3 id="ss" style="text-align:center">Score 0</h3><div style="text-align:center"><button class="b" id="sr">Restart</button></div>';
+  const x=$('#sc').getContext('2d'),N=15,Z=20,dirs={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};let sn,dr,f,sc,dead;
+  const init=()=>{sn=[[7,7]];dr=[1,0];f=[3,3];sc=0;dead=0;$('#ss').textContent='Score 0'};init();
+  b.querySelectorAll('[data-d]').forEach(k=>k.onclick=()=>{const n=dirs[k.dataset.d];if(n[0]!==-dr[0]||n[1]!==-dr[1])dr=n});$('#sr').onclick=init;
+  const iv=setInterval(()=>{if(!$('#sc')){clearInterval(iv);return}if(dead)return;
+    const h=[(sn[0][0]+dr[0]+N)%N,(sn[0][1]+dr[1]+N)%N];
+    if(sn.length>1&&sn.some(s=>s[0]===h[0]&&s[1]===h[1])){dead=1;$('#ss').textContent='Game over! Score '+sc;return}
+    sn.unshift(h);if(h[0]===f[0]&&h[1]===f[1]){sc++;f=[Math.random()*N|0,Math.random()*N|0];$('#ss').textContent='Score '+sc}else sn.pop();
+    x.fillStyle='#111';x.fillRect(0,0,300,300);x.font='18px sans-serif';x.fillStyle='#ffd400';x.fillText('⚡',f[0]*Z,f[1]*Z+16);x.fillStyle='#4f4';sn.forEach(s=>x.fillRect(s[0]*Z+1,s[1]*Z+1,Z-2,Z-2))},170)}
+function ttt(b){let g=Array(9).fill(''),over=0;const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]],win=p=>L.some(l=>l.every(i=>g[i]===p));
+  const d=m=>{b.innerHTML='<div class="gr3">'+g.map((v,i)=>`<button data-i="${i}">${v}</button>`).join('')+`</div><h3 style="text-align:center">${m||'You are ❌. Your turn!'}</h3><div style="text-align:center"><button class="b" id="nw">New game</button></div>`;
+    $('#nw').onclick=()=>{g=Array(9).fill('');over=0;d()};
+    b.querySelector('.gr3').onclick=e=>{const i=e.target.dataset.i;if(i===undefined||g[i]||over)return;g[i]='❌';
+      if(win('❌')){over=1;return d('You win! 🎉')}const em=g.map((v,j)=>v?-1:j).filter(j=>j>=0);if(!em.length){over=1;return d('Draw')}
+      let mv=null;for(const p of ['⭕','❌'])for(const j of em){g[j]=p;const w=win(p);g[j]='';if(w&&mv===null)mv=j}
+      if(mv===null)mv=g[4]===''?4:em[Math.floor(Math.random()*em.length)];g[mv]='⭕';
+      if(win('⭕')){over=1;return d('Phone wins 🤖')}if(g.every(v=>v)){over=1;return d('Draw')}d()}};d()}
+function memory(b){const E=['🐶','🐱','🦊','🐸','🐵','🦁','🐼','🐙'];let c,op,mt,mv;const init=()=>{c=E.concat(E).sort(()=>Math.random()-.5);op=[];mt=[];mv=0};init();
+  const d=()=>{b.innerHTML='<div class="gr4">'+c.map((e,i)=>`<button data-i="${i}">${op.includes(i)||mt.includes(i)?e:'❓'}</button>`).join('')+`</div><h3 style="text-align:center">Moves: ${mv}${mt.length===16?' 🎉 You win!':''}</h3><div style="text-align:center"><button class="b" id="mr">New game</button></div>`;
+    $('#mr').onclick=()=>{init();d()};
+    b.querySelector('.gr4').onclick=e=>{const i=+e.target.dataset.i;if(isNaN(i)||op.length>1||op.includes(i)||mt.includes(i))return;op.push(i);d();
+      if(op.length===2){mv++;if(c[op[0]]===c[op[1]]){mt.push(...op);op=[];d()}else setTimeout(()=>{op=[];d()},700)}}};d()}
+
+function youtube(b){if(offline(b))return;b.innerHTML='<input id="yq" placeholder="Search YouTube"><button class="b" id="ys">Search ↗</button><input id="yl" placeholder="Or paste a YouTube link to watch here"><button class="g" id="yp">▶ Play here</button><div class="m2" id="ym"></div><iframe id="yf" allow="autoplay; fullscreen" allowfullscreen style="display:none;width:100%;height:220px;border:0;border-radius:12px;margin-top:8px"></iframe>';
+  $('#ys').onclick=()=>{const q=$('#yq').value.trim();window.open(q?'https://www.youtube.com/results?search_query='+encodeURIComponent(q):'https://www.youtube.com','_blank')};
+  $('#yp').onclick=()=>{const m=$('#yl').value.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);if(!m){$('#ym').textContent='Paste a full YouTube video link.';return}$('#ym').textContent='';const f=$('#yf');f.style.display='block';f.src='https://www.youtube.com/embed/'+m[1]}}
+function google(b){b.innerHTML='<h1 style="text-align:center;margin:24px 0"><span style="color:#4285f4">G</span><span style="color:#ea4335">o</span><span style="color:#fbbc05">o</span><span style="color:#4285f4">g</span><span style="color:#34a853">l</span><span style="color:#ea4335">e</span></h1><input id="q" placeholder="Search…"><button class="b" id="go">Search</button><div class="m2" id="gm"></div>';
+  $('#go').onclick=()=>{const q=$('#q').value.trim();if(!navigator.onLine){$('#gm').textContent='No internet.';return}if(q)window.open('https://www.google.com/search?q='+encodeURIComponent(q),'_blank')}}
+function browser(b){const WEB=[['Wikipedia','wikipedia.org'],['YouTube','youtube.com'],['Khan Academy','khanacademy.org'],['Scratch','scratch.mit.edu'],['NASA','nasa.gov']];
+  b.innerHTML='<input id="u" placeholder="Website, e.g. wikipedia.org"><button class="b" id="go">Open here</button><button class="g" id="nt">New tab ↗</button><div>'+WEB.map(w=>`<button class="g" data-u="${w[1]}">${w[0]}</button>`).join('')+'</div><div class="m2">Some sites refuse to show inside an app. Use “New tab” for those.</div><iframe id="fr" style="display:none;width:100%;height:360px;border:1px solid #8884;border-radius:10px;background:#fff"></iframe>';
+  const url=()=>{let u=$('#u').value.trim();return u?(/^https?:/.test(u)?u:'https://'+u):''};
+  $('#go').onclick=()=>{const u=url();if(u){$('#fr').style.display='block';$('#fr').src=u}};$('#nt').onclick=()=>{const u=url();if(u)window.open(u,'_blank')};
+  b.onclick=e=>{const u=e.target.dataset.u;if(u){$('#u').value=u;$('#go').click()}}}
+function camera(b){let fc='environment';b.innerHTML='<video id="v" autoplay playsinline muted></video><div style="text-align:center"><button class="g" id="fl">🔄 Flip</button><button class="b" id="sh">📸 Photo</button></div><div class="m2" id="cm"></div>';
+  const st=async()=>{if(CAM)CAM.getTracks().forEach(x=>x.stop());try{CAM=await navigator.mediaDevices.getUserMedia({video:{facingMode:fc}});$('#v').srcObject=CAM;$('#cm').textContent=''}catch(e){$('#cm').textContent='Camera blocked or missing. Allow it, then tap Flip.'}};
+  $('#fl').onclick=()=>{fc=fc==='user'?'environment':'user';st()};
+  $('#sh').onclick=async()=>{const v=$('#v');if(!v.videoWidth)return;const s=Math.min(1,720/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement('canvas');c.width=v.videoWidth*s;c.height=v.videoHeight*s;c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+    const P=await getP();P.push(c.toDataURL('image/jpeg',.7));await DB.set('photos',P);$('#cm').textContent='✔ Saved to Gallery ('+P.length+')'};st()}
+async function gallery(b){let P=await getP();
+  const d=()=>{b.innerHTML='<input type="file" id="gi" accept="image/*" multiple style="margin-bottom:8px">'+(P.length?P.map((p,i)=>`<img src="${p}" data-i="${i}" style="width:32%;margin:.6%;aspect-ratio:1;object-fit:cover;border-radius:8px">`).join(''):'<p class="m2">No photos yet. Take some with Camera or import them above.</p>');
+    $('#gi').onchange=async e=>{for(const f of e.target.files){const u=await shrink(f);if(u)P.push(u)}await DB.set('photos',P);d()};
+    b.onclick=e=>{const i=e.target.dataset.i;if(i===undefined)return;
+      b.innerHTML=`<img src="${P[+i]}" style="width:100%;border-radius:12px"><div style="text-align:center"><button class="g" id="gb">← Back</button><a class="b" href="${P[+i]}" download="photo-${+i+1}.jpg" style="display:inline-block;text-decoration:none;border-radius:12px;padding:11px 16px;margin:4px">⬇ Save</a><button class="g" id="gx">🗑 Delete</button></div>`;b.onclick=null;
+      $('#gb').onclick=d;$('#gx').onclick=async()=>{P.splice(+i,1);await DB.set('photos',P);d()}}};d()}
+function phone(b){let n='';b.innerHTML='<div class="big" id="pn"></div><div class="keys">'+'123456789*0#'.split('').map(k=>`<button>${k}</button>`).join('')+'</div><button class="b" id="pc">📞 Call</button><button class="g" id="pd">⌫</button>';
+  b.querySelector('.keys').onclick=e=>{if(e.target.tagName==='BUTTON'){n+=e.target.textContent;$('#pn').textContent=n}};
+  $('#pd').onclick=()=>{n=n.slice(0,-1);$('#pn').textContent=n};$('#pc').onclick=()=>n&&(location.href='tel:'+encodeURIComponent(n))}
+function calc(b){let e='';b.innerHTML='<div class="big" id="cd" style="text-align:right;word-break:break-all"></div><div class="keys" style="grid-template-columns:repeat(4,1fr)">'+['7','8','9','÷','4','5','6','×','1','2','3','−','0','.','=','+','C','(',')','⌫'].map(k=>`<button>${k}</button>`).join('')+'</div>';
+  b.querySelector('.keys').onclick=ev=>{if(ev.target.tagName!=='BUTTON')return;const v=ev.target.textContent;
+    if(v==='C')e='';else if(v==='⌫')e=e.slice(0,-1);else if(v==='='){try{e=String(Function('return '+e.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-'))())}catch(x){e='Error'}}else{if(e==='Error')e='';e+=v}$('#cd').textContent=e}}
+function weather(b){if(offline(b))return;const W=c=>c===0?'☀️':c<4?'⛅':c<50?'🌫️':c<68?'🌧️':c<78?'❄️':c<83?'🌦️':'⛈️';
+  b.innerHTML='<input id="ct" placeholder="City name"><button class="b" id="wg">Get weather</button><button class="g" id="wl">📍 My location</button><div id="wr"></div>';
+  const show=async(la,lo,nm)=>{const r=$('#wr');r.textContent='Loading…';
+    try{const j=await(await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`)).json();const c=j.current,d=j.daily;
+      r.innerHTML=`<div style="text-align:center;margin:14px 0"><div style="font-size:60px">${W(c.weather_code)}</div><h1>${Math.round(c.temperature_2m)}°C</h1><p>${esc(nm)} · wind ${c.wind_speed_10m} km/h</p></div>`+d.time.slice(0,4).map((t,i)=>`<div class="row"><span>${new Date(t).toLocaleDateString(undefined,{weekday:'short'})} ${W(d.weather_code[i])}</span><span>${Math.round(d.temperature_2m_min[i])}° / ${Math.round(d.temperature_2m_max[i])}°</span></div>`).join('')}
+    catch(e){r.textContent='Could not load weather. Check your connection.'}};
+  $('#wg').onclick=async()=>{const q=$('#ct').value.trim();if(!q)return;try{const g=await(await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&name='+encodeURIComponent(q))).json();if(!g.results){$('#wr').textContent='City not found';return}const x=g.results[0];show(x.latitude,x.longitude,x.name)}catch(e){$('#wr').textContent='Could not search. Check your connection.'}};
+  $('#wl').onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>show(p.coords.latitude,p.coords.longitude,'Your location'),()=>$('#wr').textContent='Location not allowed'):0;
+  if(WQ){$('#ct').value=WQ;WQ='';$('#wg').click()}}
+function calendar(b){let d=new Date();d.setDate(1);S.ev=S.ev||{};
+  const dr=()=>{const y=d.getFullYear(),m=d.getMonth(),f=d.getDay(),n=new Date(y,m+1,0).getDate(),now=new Date();let c='';for(let i=0;i<f;i++)c+='<div></div>';
+    for(let i=1;i<=n;i++){const k=y+'-'+pad(m+1)+'-'+pad(i),td=now.getFullYear()===y&&now.getMonth()===m&&now.getDate()===i;c+=`<div data-k="${k}" style="padding:8px 0;text-align:center;border-radius:50%;cursor:pointer;${td?'background:var(--ac);color:#000;font-weight:700':''}">${i}${S.ev[k]?'<br><small>•</small>':''}</div>`}
+    const evs=Object.keys(S.ev).filter(k=>k.startsWith(y+'-'+pad(m+1))).sort();
+    b.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><button class="g" id="cp">◀</button><h3>${d.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</h3><button class="g" id="cn">▶</button></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">${'SMTWTFS'.split('').map(x=>`<b style="text-align:center">${x}</b>`).join('')}${c}</div><div class="m2">Tap a day to add or edit an event.</div>`+evs.map(k=>`<div class="row"><span>📌 ${k.slice(8)}</span><span>${esc(S.ev[k])}</span></div>`).join('');
+    $('#cp').onclick=()=>{d.setMonth(m-1);dr()};$('#cn').onclick=()=>{d.setMonth(m+1);dr()};
+    b.onclick=e=>{const k=e.target.closest('[data-k]');if(!k)return;const v=prompt('Event for '+k.dataset.k+' (empty to delete)',S.ev[k.dataset.k]||'');if(v===null)return;if(v.trim())S.ev[k.dataset.k]=v.trim();else delete S.ev[k.dataset.k];save();dr()}};dr()}
+function movies(b){let tab=0;
+  const d=()=>{b.innerHTML=`<div><button class="${tab?'g':'b'}" data-t="0">🎥 My videos</button><button class="${tab?'b':'g'}" data-t="1">📺 Free to watch</button></div>`+(tab?FREE.map(f=>`<div class="row" data-u="${f[1]}" style="cursor:pointer"><span>${f[2]} ${f[0]}</span><span>↗</span></div>`).join('')+'<div class="m2">Opens in a new tab.</div>':'<input type="file" id="vf" accept="video/*" multiple><video id="mv" controls playsinline style="margin-top:8px;min-height:160px"></video><div id="vl"></div>');
+    if(!tab){let L=[];const play=i=>{if(L[i]){$('#mv').src=URL.createObjectURL(L[i]);$('#mv').play().catch(()=>{})}};
+      $('#vf').onchange=e=>{L=[...e.target.files];$('#vl').innerHTML=L.map((f,i)=>`<div class="row" data-i="${i}" style="cursor:pointer">🎬 ${esc(f.name)}</div>`).join('');play(0)};
+      $('#vl').onclick=e=>{const r=e.target.closest('[data-i]');if(r)play(+r.dataset.i)}}
+    b.onclick=e=>{const t=e.target.dataset.t,r=e.target.closest('[data-u]');if(t!==undefined){tab=+t;d()}else if(r)window.open(r.dataset.u,'_blank')}};d()}
+function clock(b){let sw=0,run=0,last=0,tm=0;b.innerHTML='<h1 id="ck" style="text-align:center;font-weight:300;margin:16px 0"></h1><h3>Stopwatch</h3><h2 id="sw">0.0s</h2><button class="b" id="ss">Start</button><button class="g" id="sr">Reset</button><h3>Timer</h3><input id="tm" type="number" min="1" placeholder="Minutes"><button class="b" id="ts">Start timer</button><h2 id="tl"></h2>';
+  const iv=setInterval(()=>{if(!$('#ck')){clearInterval(iv);return}$('#ck').textContent=new Date().toLocaleTimeString();if(run){sw+=Date.now()-last;last=Date.now();$('#sw').textContent=(sw/1000).toFixed(1)+'s'}
+    if(tm){const r=Math.ceil((tm-Date.now())/1000);if(r<=0){tm=0;$('#tl').textContent='';navigator.vibrate&&navigator.vibrate([300,100,300]);alert('⏰ Time is up!')}else $('#tl').textContent=Math.floor(r/60)+':'+pad(r%60)}},100);
+  $('#ss').onclick=()=>{run=!run;last=Date.now();$('#ss').textContent=run?'Stop':'Start'};$('#sr').onclick=()=>{sw=0;run=0;$('#ss').textContent='Start';$('#sw').textContent='0.0s'};
+  $('#ts').onclick=()=>{const m=+$('#tm').value;if(m>0)tm=Date.now()+m*60000}}
+function hyperai(b){b.innerHTML='<div id="cl" style="min-height:280px"></div><input id="ci" placeholder="Ask HyperAI…"><button class="b" id="cs">Send</button><div class="m2">Try: open camera · weather in Paris · timer 5 · 12*8 · what is a volcano · tell me a joke</div>';
+  const say=(t,me)=>{const c=$('#cl');if(!c)return;c.insertAdjacentHTML('beforeend',`<div class="msg ${me?'me':''}">${esc(t)}</div>`);$('#ab').scrollTop=99999};
+  say('Hi! I am HyperAI ⚡ I can open apps, set timers, do math, check weather and look things up.');
+  const run=async()=>{const q=$('#ci').value.trim();if(!q)return;$('#ci').value='';say(q,1);say(await ai(q))};$('#cs').onclick=run;$('#ci').onkeydown=e=>e.key==='Enter'&&run()}
+async function ai(q){const l=q.toLowerCase().trim();let m;
+  if(/^(hi|hello|hey)\b/.test(l))return 'Hello'+(S.name?', '+S.name:'')+'! How can I help?';
+  if(m=l.match(/^open (.+)/)){const a=all().find(a=>a[0].toLowerCase().includes(m[1].trim()));if(a){openApp(a);return 'Opening '+a[0]+'…'}return 'I could not find “'+m[1]+'”. Maybe get it in the HyperBolt Store.'}
+  if(/\btime\b/.test(l))return 'It is '+new Date().toLocaleTimeString()+'.';
+  if(/\b(date|today)\b/.test(l)&&!/weather/.test(l))return 'Today is '+new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'.';
+  if(/^[\d\s+\-*/().x×÷^%]+$/.test(l)&&/\d/.test(l)&&/[+\-*/x×÷^%]/.test(l)){try{return '= '+Function('return '+l.replace(/x|×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**'))()}catch(e){return 'That math did not work.'}}
+  if(m=l.match(/timer (?:for )?(\d+)/)){const n=+m[1];setTimeout(()=>{alert('⏰ Timer done: '+n+' min');navigator.vibrate&&navigator.vibrate([300,100,300])},n*60000);return 'Timer set for '+n+' minute'+(n>1?'s':'')+' ⏱️ (keep this page open).'}
+  if(/flashlight|torch/.test(l)){const o=!/off/.test(l);torch(o);return 'Flashlight '+(o?'on':'off')+' 🔦'}
+  if(/dark mode/.test(l)){S.dark=/off|light/.test(l)?0:1;save();look();return 'Dark mode '+(S.dark?'on':'off')+' 🌙'}
+  if(/eye care/.test(l)){S.eye=/off/.test(l)?0:1;save();look();return 'Eye care '+(S.eye?'on':'off')+' 👁'}
+  if(m=l.match(/weather(?: in (.+))?/)){WQ=m[1]||'';openApp(all().find(a=>a[0]==='Weather'));return 'Opening Weather…'}
+  if(/joke/.test(l))return JK[Math.floor(Math.random()*JK.length)];
+  if(m=l.match(/^(?:search|google) (.+)/)){window.open('https://www.google.com/search?q='+encodeURIComponent(m[1]),'_blank');return 'Searching Google for “'+m[1]+'”…'}
+  if(/who are you|your name/.test(l))return 'I am HyperAI, the helper inside HyperBolt OS ⚡';
+  if(!navigator.onLine)return 'I need internet to look that up.';
+  const k=q.replace(/^(who|what|where|when|why|how)( is| are| was| were| do| does)?( a| an| the)?\s*/i,'').replace(/^(tell me about|explain)\s*/i,'').replace(/\?$/,'');
+  try{const j=await(await fetch('https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(k)+'&gsrlimit=1&prop=extracts&exintro=1&explaintext=1&exsentences=3&format=json&origin=*')).json();const p=j.query&&Object.values(j.query.pages)[0];if(p&&p.extract)return p.extract+' (Wikipedia)'}catch(e){}
+  return 'I am not sure about that yet. Try “open camera”, “weather in Paris”, “timer 5” or a question like “what is a volcano”.'}
+function chat(b){S.chats=S.chats||{};S.me=S.me||Math.random().toString(36).slice(2,10);let es=null;
+  Object.keys(S.chats).forEach(k=>{if(!/^hb-/.test(k))delete S.chats[k]});
+  const stop=()=>{if(es){es.close();es=null}};
+  const code=()=>'hb-'+Array.from(crypto.getRandomValues(new Uint8Array(10)),x=>'abcdefghijklmnopqrstuvwxyz0123456789'[x%36]).join('');
+  const L=()=>{stop();const ks=Object.keys(S.chats);
+    b.innerHTML='<h3>💬 Chat rooms</h3><input id="rn" placeholder="Room name (e.g. Family)"><button class="b" id="rc">＋ New room</button><input id="rj" placeholder="Have a code? Paste it here"><button class="g" id="rjb">Join room</button>'+(ks.length?ks.map(k=>`<div class="row" data-k="${k}" style="cursor:pointer"><span>💬 ${esc(S.chats[k].n)}</span><small style="opacity:.6">${esc((S.chats[k].m.slice(-1)[0]||{}).t||'')}</small></div>`).join(''):'<p class="m2">No rooms yet. Make one and share its code with a friend who has HyperBolt OS.</p>')+'<h3>📲 Text a phone number</h3><input id="sn" placeholder="Phone number" inputmode="tel"><input id="st" placeholder="Message"><button class="g" id="ss2">Open SMS app</button>';
+    $('#rc').onclick=()=>{const n=$('#rn').value.trim()||'Room',c=code();S.chats[c]={n,m:[]};save();T(c)};
+    $('#rjb').onclick=()=>{const c=$('#rj').value.trim().toLowerCase();if(!/^hb-[a-z0-9]{10}$/.test(c)){toast('That code does not look right');return}if(!S.chats[c]){S.chats[c]={n:'Room '+c.slice(3,7),m:[]};save()}T(c)};
+    $('#ss2').onclick=()=>{const p=$('#sn').value.trim();if(p)location.href='sms:'+encodeURIComponent(p)+'?&body='+encodeURIComponent($('#st').value)};
+    b.onclick=e=>{const r=e.target.closest('.row');if(r)T(r.dataset.k)}};
+  const T=c=>{const R=S.chats[c];b.onclick=null;
+    const msgs=()=>R.m.map(x=>`<div class="msg ${x.u===S.me?'me':''}"><small style="opacity:.7">${x.u===S.me?'You':esc(x.n)}</small><br>${esc(x.t)}</div>`).join('')||'<p class="m2">No messages yet. Say hi!</p>';
+    b.innerHTML=`<button class="g" id="bk">← Rooms</button> <b>${esc(R.n)}</b><div class="m2">Share this code with your friend: <b>${c}</b> <button class="g" id="cp2">Copy</button><br>Anyone with the code can read this chat. Do not share personal information.</div><div id="cml" style="margin:10px 0;min-height:200px">${msgs()}</div><input id="mi" placeholder="Message"><button class="b" id="sd">Send</button><button class="g" id="dl">Leave room</button>`;
+    $('#bk').onclick=L;$('#cp2').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText(c).then(()=>toast('Code copied'));
+    $('#dl').onclick=()=>{if(confirm('Leave this room and delete its messages from this phone?')){delete S.chats[c];save();L()}};
+    const send=async()=>{const t=$('#mi').value.trim();if(!t)return;if(!navigator.onLine){toast('No internet');return}$('#mi').value='';
+      try{const r=await fetch('https://ntfy.sh/'+c,{method:'POST',body:JSON.stringify({u:S.me,n:S.name||'Friend',t})});if(!r.ok)throw 0}catch(e){toast('Could not send. Try again.');$('#mi').value=t}};
+    $('#sd').onclick=send;$('#mi').onkeydown=e=>e.key==='Enter'&&send();
+    if(navigator.onLine){es=new EventSource('https://ntfy.sh/'+c+'/sse?since=12h');
+      es.onmessage=ev=>{if(!$('#cml')){stop();return}try{const j=JSON.parse(ev.data);if(j.event!=='message'||R.m.some(x=>x.id===j.id))return;const p=JSON.parse(j.message);R.m.push({id:j.id,u:p.u,n:p.n,t:p.t});if(R.m.length>200)R.m.shift();save();$('#cml').innerHTML=msgs();$('#ab').scrollTop=99999}catch(e){}}}};
+  L()}
+async function files(b){let F=(await DB.get('files'))||[],P=await getP(),RC=((await DB.get('recs'))||[]).length;
+  const d=()=>{b.innerHTML=`<div class="row"><span>🖼️ Gallery photos</span><b>${P.length}</b></div><div class="row"><span>📝 Notes</span><b>${S.note.length} chars</b></div><div class="row"><span>🎙️ Recordings</span><b>${RC}</b></div><h3>My files</h3><input type="file" id="ff" multiple><div class="m2">Files up to 3 MB are kept on your phone.</div>`+(F.length?F.map((f,i)=>`<div class="row"><span style="word-break:break-all">📄 ${esc(f.n)}<br><small style="opacity:.6">${(f.s/1024).toFixed(0)} KB</small></span><span><a class="g" href="${f.d}" download="${esc(f.n)}" style="text-decoration:none;display:inline-block;border-radius:12px;padding:8px 12px">⬇</a><button class="g" data-x="${i}">🗑</button></span></div>`).join(''):'<p class="m2">No files yet.</p>');
+    $('#ff').onchange=e=>{[...e.target.files].forEach(f=>{if(f.size>3e6){alert(f.name+' is bigger than 3 MB');return}const r=new FileReader();r.onload=async()=>{F.push({n:f.name,s:f.size,d:r.result});await DB.set('files',F);d()};r.readAsDataURL(f)})};
+    b.onclick=async e=>{const i=e.target.dataset.x;if(i!==undefined){F.splice(+i,1);await DB.set('files',F);d()}}};d()}
+function notes(b){b.innerHTML='<textarea id="nt" rows="14" placeholder="Write here…"></textarea>';$('#nt').value=S.note;$('#nt').oninput=e=>{S.note=e.target.value;save()}}
+
+// ===== Store apps (get them from HyperBolt Store) =====
+function paint(b){b.innerHTML='<canvas id="pc" width="320" height="380" style="width:100%;border:1px solid #8884;border-radius:12px;touch-action:none"></canvas><div><input type="color" id="pk" value="#e63946" style="width:60px;height:40px"> <input type="range" id="pw" min="2" max="24" value="6" style="width:30%"><button class="g" id="pcl">Clear</button><button class="b" id="psv">Save</button></div>';
+  const c=$('#pc'),x=c.getContext('2d');x.lineCap='round';x.lineJoin='round';let d=0;const wipe=()=>{x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height)};wipe();
+  const pos=e=>{const r=c.getBoundingClientRect();return[(e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height]};
+  c.onpointerdown=e=>{d=1;const p=pos(e);x.beginPath();x.moveTo(p[0],p[1]);c.setPointerCapture(e.pointerId)};
+  c.onpointermove=e=>{if(!d)return;const p=pos(e);x.strokeStyle=$('#pk').value;x.lineWidth=$('#pw').value;x.lineTo(p[0],p[1]);x.stroke()};c.onpointerup=()=>d=0;
+  $('#pcl').onclick=wipe;$('#psv').onclick=async()=>{const P=await getP();P.push(c.toDataURL('image/jpeg',.8));await DB.set('photos',P);alert('Saved to Gallery!')}}
+async function rec(b){let R=(await DB.get('recs'))||[],mr,ch=[];
+  b.innerHTML='<div style="text-align:center;margin-top:10px"><button class="b" id="rb" style="font-size:40px;border-radius:50%;width:110px;height:110px">⏺</button><p id="rm">Tap to record</p></div><div id="rl"></div>';
+  const list=()=>{$('#rl').innerHTML=R.length?R.map((r,i)=>`<div class="row" style="flex-wrap:wrap"><small>${esc(r.t)}</small><button class="g" data-x="${i}">🗑</button><audio controls src="${URL.createObjectURL(r.b)}" style="width:100%"></audio></div>`).join(''):'<p class="m2">No recordings yet.</p>'};list();
+  $('#rl').onclick=async e=>{const x=e.target.dataset.x;if(x!==undefined){R.splice(+x,1);await DB.set('recs',R);list()}};
+  $('#rb').onclick=async()=>{if(mr&&mr.state==='recording'){mr.stop();return}
+    try{const st=await navigator.mediaDevices.getUserMedia({audio:true});mr=new MediaRecorder(st);ch=[];mr.ondataavailable=e=>ch.push(e.data);
+      mr.onstop=async()=>{st.getTracks().forEach(t=>t.stop());R.unshift({t:new Date().toLocaleString(),b:new Blob(ch,{type:mr.mimeType})});await DB.set('recs',R);list();$('#rb').textContent='⏺';$('#rm').textContent='Saved. Tap to record again'};
+      mr.start();$('#rb').textContent='⏹';$('#rm').textContent='Recording… tap to stop'}catch(e){$('#rm').textContent='Microphone blocked or missing.'}}}
+function music(b){let L=[];b.innerHTML='<input type="file" id="mf" accept="audio/*" multiple><div id="ml"></div><audio id="au" controls style="width:100%;margin-top:10px"></audio>';
+  $('#mf').onchange=e=>{L=[...e.target.files];$('#ml').innerHTML=L.map((f,i)=>`<div class="row" data-i="${i}" style="cursor:pointer">🎵 ${esc(f.name)}</div>`).join('')};
+  $('#ml').onclick=e=>{const r=e.target.closest('[data-i]');if(r){const a=$('#au');a.src=URL.createObjectURL(L[+r.dataset.i]);a.play()}}}
+function maps(b){if(offline(b))return;b.innerHTML='<input id="mq" placeholder="Search a place"><button class="b" id="mg">Search</button><button class="g" id="mh">📍 Me</button><iframe id="mfr" style="width:100%;height:400px;border:0;border-radius:12px;margin-top:8px"></iframe><div class="m2" id="mt">Map by OpenStreetMap</div>';
+  const go=(la,lo,z)=>$('#mfr').src=`https://www.openstreetmap.org/export/embed.html?bbox=${lo-z},${la-z},${lo+z},${la+z}&layer=mapnik&marker=${la},${lo}`;
+  $('#mg').onclick=async()=>{const q=$('#mq').value.trim();if(!q)return;try{const r=await(await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q))).json();r[0]?go(+r[0].lat,+r[0].lon,.02):$('#mt').textContent='Place not found'}catch(e){$('#mt').textContent='Could not search.'}};
+  $('#mh').onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>go(p.coords.latitude,p.coords.longitude,.01),()=>$('#mt').textContent='Location not allowed'):0;go(20.5,78.9,12)}
+function todo(b){S.todo=S.todo||[];const d=()=>{b.innerHTML='<input id="ti" placeholder="New task"><button class="b" id="ta">Add</button>'+(S.todo.length?S.todo.map((t,i)=>`<div class="row"><label style="margin:0"><input type="checkbox" data-i="${i}" ${t.d?'checked':''}> <span style="${t.d?'text-decoration:line-through;opacity:.5':''}">${esc(t.t)}</span></label><button class="g" data-x="${i}">🗑</button></div>`).join(''):'<p class="m2">Nothing to do 🎉</p>');
+  $('#ta').onclick=()=>{const v=$('#ti').value.trim();if(v){S.todo.push({t:v,d:0});save();d()}};
+  b.onclick=e=>{const i=e.target.dataset.i,x=e.target.dataset.x;if(i!==undefined){S.todo[+i].d=e.target.checked;save();d()}else if(x!==undefined){S.todo.splice(+x,1);save();d()}}};d()}
+const W=(id,n,i,url,d,fr)=>[n,i,b=>{if(offline(b))return;b.innerHTML=`<div style="text-align:center;margin:16px 0"><div style="font-size:56px">${i}</div><h2>${esc(n)}</h2><button class="b" id="wo">Open ↗</button></div>`+(fr?`<iframe src="${url}" style="width:100%;height:400px;border:1px solid #8884;border-radius:10px;background:#fff"></iframe>`:'<div class="m2" style="text-align:center">Opens in a new tab.</div>');
+  $('#wo').onclick=()=>window.open(url,'_blank');if(!fr)window.open(url,'_blank')},'#ffffff33',id,'Websites',d];
+
+// ===== app tables: [name, icon, function, tile color, id, category, description, title icon] =====
+const A=[
+['Settings','⚙️',settings,'#8e8e93'],['Themes','🎨',themes,'#ff7eb3'],['HyperBolt Store',BASKET,store,'#fff1cc','','','','👜'],['Games','🎮',games,'#7b61ff'],
+['YouTube','<b style="color:#fff;font-size:28px">▶</b>',youtube,'#ff0000','','','','▶️'],['Google',GICON,google,'#fff','','','','🔍'],['Browser','🌐',browser,'#2a7de1'],['Camera','📷',camera,'#3a3a44'],
+['Gallery','🖼️',gallery,'#34c759'],['Phone','📞',phone,'#30d158'],['Calculator','<b style="font:700 17px/1.15 system-ui;text-align:center;color:#fff">+−<br>×÷</b>',calc,'#ff9f0a','','','','🧮'],
+['Weather','<span style="font-size:15px;line-height:1.15;text-align:center">☀️🌧️<br>☁️</span>',weather,'#4a90e2','','','','⛅'],['Calendar','📅',calendar,'#fff'],
+['HyperBolt Movies and TV','<span style="font-size:17px">🎥📺</span>',movies,'#5e2ca5','','','','🎬'],['Clock','⏰',clock,'#1c1c1e'],['HyperAI',AIICON,hyperai,'linear-gradient(135deg,#6a11cb,#00c6ff)'],
+['Chat','💬',chat,'#32ade6'],['Files','📁',files,'#ffb340'],['Notes','📝',notes,'#ffd60a']];
+const X=[
+['Paint','🖌️',paint,'#ff6b6b','paint','Tools','Draw with your finger'],['Voice Recorder','🎙️',rec,'#ef476f','rec','Tools','Record your voice'],['Music','🎵',music,'#06d6a0','music','Apps','Play songs from your phone'],
+['Maps','🗺️',maps,'#4caf50','maps','Apps','Real maps. Find places.'],['To-Do','✅',todo,'#118ab2','todo','Tools','Keep track of tasks'],
+W('wiki','Wikipedia','📚','https://en.m.wikipedia.org','Free encyclopedia',1),W('khan','Khan Academy','🎓','https://www.khanacademy.org','Learn anything'),W('scratch','Scratch','🐱','https://scratch.mit.edu','Make games with blocks'),
+W('nasa','NASA','🚀','https://www.nasa.gov','Space news'),W('code','Code.org','💻','https://code.org','Learn to code'),W('duo','Duolingo','🦉','https://www.duolingo.com','Learn languages')];
+const all=()=>A.concat(X.filter(x=>S.inst.includes(x[4])));
+function grid(){$('#grid').innerHTML=all().map((a,i)=>`<div class="ap" data-i="${i}"><i style="background:${a[3]||''}">${a[1]}</i>${esc(a[0])}</div>`).join('')}
+grid();
+function openApp(a){$('#at').innerHTML=(a[7]||a[1])+' '+esc(a[0]);$('#app').classList.add('on');$('#ab').onclick=null;$('#ab').scrollTop=0;a[2]($('#ab'))}
+$('#grid').onclick=e=>{const d=e.target.closest('.ap');if(d)openApp(all()[+d.dataset.i])};
+$('#cam').onclick=()=>openApp(A.find(a=>a[0]==='Camera'));
+$('#ax').onclick=closeApp;$('#bar').onclick=closeApp;
+
+// ---- screenshot: draws this screen into a picture and saves it to Gallery ----
+function toast(x){const e=$('#toast');e.textContent=x;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2500)}
+async function domShot(){
+  const o=$('#os'),w=o.offsetWidth,h=o.offsetHeight,sc=Math.min(2,window.devicePixelRatio||1);
+  const cl=o.cloneNode(true),A1=[o,...o.querySelectorAll('*')],A2=[cl,...cl.querySelectorAll('*')],swap=[];
+  A1.forEach((e,i)=>{const cs=getComputedStyle(e);let t='';for(const p of cs)t+=p+':'+cs.getPropertyValue(p)+';';A2[i].setAttribute('style',t);
+    if(e.tagName==='INPUT')A2[i].setAttribute('value',e.value);if(e.tagName==='TEXTAREA')A2[i].textContent=e.value;
+    if(e.tagName==='CANVAS'||e.tagName==='VIDEO'){const c=document.createElement('canvas');c.width=e.videoWidth||e.width||1;c.height=e.videoHeight||e.height||1;try{c.getContext('2d').drawImage(e,0,0)}catch(x){}const im=document.createElement('img');im.src=c.toDataURL();im.setAttribute('style',t);swap.push([A2[i],im])}});
+  swap.forEach(x=>x[0].replaceWith(x[1]));['#toast','#shut'].forEach(q=>{const n=cl.querySelector(q);if(n)n.remove()});
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><foreignObject width="100%" height="100%">${new XMLSerializer().serializeToString(cl)}</foreignObject></svg>`;
+  const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);await img.decode();
+  const c=document.createElement('canvas');c.width=w*sc;c.height=h*sc;const x=c.getContext('2d');x.scale(sc,sc);x.drawImage(img,0,0,w,h);return c.toDataURL('image/jpeg',.92)}
+async function screenShot(){const st=await navigator.mediaDevices.getDisplayMedia({video:true,preferCurrentTab:true}),v=document.createElement('video');v.srcObject=st;await v.play();await new Promise(r=>setTimeout(r,300));
+  const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);st.getTracks().forEach(t=>t.stop());return c.toDataURL('image/jpeg',.92)}
+async function shot(){$('#qs').classList.remove('open');await new Promise(r=>setTimeout(r,300));let u='';
+  try{u=await domShot()}catch(e){try{u=await screenShot()}catch(e2){toast('Screenshots are not supported in this browser.');return}}
+  const P=await getP();P.push(u);await DB.set('photos',P);const f=$('#shut');f.style.transition='none';f.style.opacity=.8;requestAnimationFrame(()=>{f.style.transition='opacity .35s';f.style.opacity=0});toast('📸 Screenshot saved to Gallery')}
+
+// ---- quick settings and swipes ----
+function tiles(){const T=[['👁 Eye care','eye',S.eye],['🌙 Dark','dark',S.dark],['🔦 Torch','tor',torchOn()],['🔒 Lock','lock',0],['📸 Screenshot','shot',0]];
+  $('#tiles').innerHTML=T.map(x=>`<div class="tile ${x[2]?'on':''}" data-k="${x[1]}">${x[0]}</div>`).join('');
+  $('#net').textContent=navigator.onLine?'📶 Online':'📵 Offline'}
+$('#tiles').onclick=e=>{const k=e.target.dataset.k;if(!k)return;
+  if(k==='eye')S.eye=S.eye?0:1;else if(k==='dark')S.dark=S.dark?0:1;
+  else if(k==='shot'){shot();return}else if(k==='tor'){torch(!torchOn());$('#qs').classList.remove('open')}else if(k==='lock'){$('#qs').classList.remove('open');go('lock')}
+  save();look();tiles()};
+$('#bri').oninput=e=>$('#os').style.filter=`brightness(${e.target.value}%)`;
+let sy=null;const os=$('#os');
+os.addEventListener('pointerdown',e=>{sy=e.clientY-os.getBoundingClientRect().top});
+os.addEventListener('pointerup',e=>{if(sy===null)return;const dy=e.clientY-os.getBoundingClientRect().top-sy,q=$('#qs');
+  if(q.classList.contains('open')){if(dy<-40)q.classList.remove('open')}
+  else if(on('boot')||on('setup')||on('auth')){}
+  else if(dy>60&&sy<130){tiles();q.classList.add('open')}
+  else if(dy<-70&&on('lock')&&!on('app'))unlock();
+  sy=null});
+
+// ---- start ----
+$('#hint').textContent=t(0);look();tick();
+const READY=Math.round(performance.now()-T0);
+setTimeout(()=>{$('#boot').classList.remove('on');S.done&&location.hash!=='#setup'?go('lock'):setup()},700);
+</script>
+</body></html>
